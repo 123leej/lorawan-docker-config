@@ -2,40 +2,70 @@ version: "2"
 
 services:
   loraserver:
-    image: loraserver/loraserver:2
+    image: 123leej/net-server:latest
     volumes:
       - ./configuration/loraserver:/etc/loraserver
-
+    networks:
+      app_net:
+        ipv4_address: 117.16.136.91
+ 
   appserver:
-    image: loraserver/lora-app-server:2
+    image: 123leej/app-server:latest
     ports:
       - 8080:8080
     volumes:
       - ./configuration/lora-app-server:/etc/lora-app-server
+    networks:
+      app_net:
+        ipv4_address: 117.16.136.91
 
   gatewaybridge:
-    image: loraserver/lora-gateway-bridge:2
+    image: 123leej/gw-bridge:latest
     ports:
       - 1700:1700/udp
     volumes:
       - ./configuration/lora-gateway-bridge:/etc/lora-gateway-bridge
+    networks:
+      app_net:
+        ipv4_address: 117.16.136.91
   
   postgresql:
-    image: postgres:9.6-alpine
+    image: 123leej/postgres:latest
     ports:
       - 5432
     volumes:
       - ./configuration/postgresql/initdb:/docker-entrypoint-initdb.d
       - ./data/postgresql:/var/lib/postgresql/data
+    networks:
+      app_net:
+        ipv4_address: 117.16.136.91
 
   redis:
     ports:
       - 6379
-    image: redis:4-alpine
+    image: 123leej/redis:latest
     volumes:
       - ./data/redis:/data
+    networks:
+      app_net:
+        ipv4_address: 117.16.136.91
 
   mosquitto:
     image: eclipse-mosquitto
     ports:
       - 1883:1883
+
+    networks:
+      app_net:
+        ipv4_address: 117.16.136.91
+
+networks:
+  app_net:
+    driver: bridge,
+    driver_opts:
+      com.docker.network.enable_ip6: "false"
+    ipam:
+      driver: default
+      config:
+      - subnet: 255.255.255.0/24
+        gateway: 117.16.136.254
